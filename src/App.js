@@ -14,16 +14,11 @@ import {
   ThemeProvider,
   CssBaseline,
   Box,
+  LinearProgress,
+  Typography,
 } from "@mui/material";
 
 function App() {
-  //Create a theme with a custom font
-  const theme = createTheme({
-    typography: {
-      fontFamily: "'Inter', sans-serif",
-    },
-  });
-
   //state to store the values
   const [formData, setFormData] = useState({
     name: "",
@@ -32,15 +27,35 @@ function App() {
     satisfaction: "",
   });
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+  //function to reset the survey
+  const handleClear = () => {
+    setFormData({
+      name: "",
+      email: "",
+      age: "",
+      satisfaction: "",
+    });
   };
 
-  const [satisfaction, setSatisfaction] = useState("");
+  //fields for the progress bar
+  const totalFields = Object.keys(formData).length;
+  const filledFields = Object.values(formData).filter(Boolean).length;
+  //percentage
+  const progress = (filledFields / totalFields) * 100;
+
+  //Create a theme with a custom font
+  const theme = createTheme({
+    typography: {
+      fontFamily: "'Inter', sans-serif",
+    },
+  });
+
+  const handleChange = (e) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -65,7 +80,17 @@ function App() {
             maxWidth: 500,
           }}
         >
-          <h2>PLEASE COMPLETE THE SURVEY</h2>
+          <h2>HOW WAS OUR SERVICE?</h2>
+
+          {/*Progress bar */}
+          <LinearProgress
+            variant="determinate"
+            value={progress}
+            sx={{ mt: 2, height: 10 }}
+          />
+          <Typography variant="body2">
+            {Math.round(progress)}% completed
+          </Typography>
 
           <TextField
             label="Name"
@@ -73,6 +98,8 @@ function App() {
             variant="outlined"
             fullWidth
             margin="normal"
+            value={formData.name}
+            onChange={handleChange}
           />
           <TextField
             label="Email"
@@ -81,6 +108,8 @@ function App() {
             variant="outlined"
             fullWidth
             margin="normal"
+            value={formData.email}
+            onChange={handleChange}
           />
           <TextField
             label="Age"
@@ -89,14 +118,16 @@ function App() {
             variant="outlined"
             fullWidth
             margin="normal"
+            value={formData.age}
+            onChange={handleChange}
           />
 
           <FormControl component="fieldset" margin="normal">
             <h4>Satisfaction Level</h4>
             <RadioGroup
               name="satisfaction"
-              value={satisfaction}
-              onChange={(e) => setSatisfaction(e.target.value)}
+              value={formData.satisfaction}
+              onChange={handleChange}
             >
               <FormControlLabel
                 value="Very Satisfied"
@@ -125,12 +156,13 @@ function App() {
               />
             </RadioGroup>
           </FormControl>
+
           <Button
             variant="contained"
             color="primary"
             fullWidth
             sx={{ mt: 2 }}
-            onClick={() => console.log(formData)}
+            onClick={handleClear}
           >
             Submit
           </Button>
