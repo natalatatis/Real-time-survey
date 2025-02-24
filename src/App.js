@@ -27,14 +27,31 @@ function App() {
     satisfaction: "",
   });
 
-  //function to reset the survey
-  const handleClear = () => {
-    setFormData({
-      name: "",
-      email: "",
-      age: "",
-      satisfaction: "",
-    });
+  //email validation
+  const [emailError, setEmailError] = useState("");
+
+  //success message for when the survey is sent
+  const [successMessage, setSuccessMessage] = useState("");
+
+  //function that handles everything when submitted
+  const handleSubmit = () => {
+    if (!formData.email.includes("@")) {
+      setEmailError("Invalid email address!");
+      return;
+    }
+    setEmailError("");
+
+    setSuccessMessage("Survey complete!");
+
+    setTimeout(() => {
+      setFormData({
+        name: "",
+        email: "",
+        age: "",
+        satisfaction: "",
+      });
+      setSuccessMessage("");
+    }, 5000);
   };
 
   //fields for the progress bar
@@ -50,7 +67,20 @@ function App() {
     },
   });
 
+  const [ageError, setAgeError] = useState("");
+
   const handleChange = (e) => {
+    //this prevents gettting ages under 12 or above 120
+    const { name, value } = e.target;
+    if (name === "age") {
+      const age = Number(value);
+      if (age && (age < 12 || age > 120)) {
+        setAgeError("Age must be between 12 and 120.");
+      } else {
+        setAgeError("");
+      }
+    }
+
     setFormData((prevData) => ({
       ...prevData,
       [e.target.name]: e.target.value,
@@ -80,7 +110,7 @@ function App() {
             maxWidth: 500,
           }}
         >
-          <h2>HOW WAS OUR SERVICE?</h2>
+          <h2>RATE OUR SERVICE</h2>
 
           {/*Progress bar */}
           <LinearProgress
@@ -93,7 +123,7 @@ function App() {
           </Typography>
 
           <TextField
-            label="Name"
+            label="Name *"
             name="name"
             variant="outlined"
             fullWidth
@@ -102,7 +132,7 @@ function App() {
             onChange={handleChange}
           />
           <TextField
-            label="Email"
+            label="Email *"
             name="email"
             type="email"
             variant="outlined"
@@ -110,9 +140,11 @@ function App() {
             margin="normal"
             value={formData.email}
             onChange={handleChange}
+            error={!!emailError}
+            helperText={emailError}
           />
           <TextField
-            label="Age"
+            label="Age *"
             name="age"
             type="number"
             variant="outlined"
@@ -120,10 +152,12 @@ function App() {
             margin="normal"
             value={formData.age}
             onChange={handleChange}
+            error={!!ageError}
+            helperText={ageError}
           />
 
           <FormControl component="fieldset" margin="normal">
-            <h4>Satisfaction Level</h4>
+            <h4>Satisfaction Level *</h4>
             <RadioGroup
               name="satisfaction"
               value={formData.satisfaction}
@@ -162,10 +196,28 @@ function App() {
             color="primary"
             fullWidth
             sx={{ mt: 2 }}
-            onClick={handleClear}
+            onClick={handleSubmit}
+            disabled={
+              !formData.name.trim() ||
+              !formData.email.trim() ||
+              !formData.age.trim() ||
+              !formData.satisfaction
+            }
           >
             Submit
           </Button>
+          {successMessage && (
+            <Typography
+              variant="body1"
+              sx={{
+                color: "green",
+                mt: 2,
+                fontWeight: "bold",
+              }}
+            >
+              {successMessage}
+            </Typography>
+          )}
         </Box>
       </Box>
     </ThemeProvider>
